@@ -1,0 +1,65 @@
+
+📘 Day 1: Dynamic Programming — Fibonacci Number with Memoization
+✅ Problem:
+Compute the n-th Fibonacci number where:
+
+F(0) = 0
+
+F(1) = 1
+
+F(n) = F(n-1) + F(n-2) for n > 1
+
+✅ Concepts Used:
+Memoization — a technique in dynamic programming to store results of subproblems so we don't compute them multiple times.
+
+🧠 Why Memoization?
+Without memoization, solving Fibonacci recursively leads to exponential time complexity O(2^n) because the same subproblems are solved again and again.
+
+With memoization, we store the result of each subproblem in a dp array, reducing time complexity to O(n).
+
+class Solution {
+public:
+    
+    // Helper function using recursion + memoization
+    int solve(int n, vector<int>& dp) {
+        // Base cases
+        if (n <= 1) return n;
+        
+        // If already computed, return stored value
+        if (dp[n] != -1) return dp[n];
+        
+        // Compute and store the result
+        return dp[n] = solve(n - 1, dp) + solve(n - 2, dp);
+    }
+
+    // Main function to return the nth Fibonacci number
+    int fib(int n) {
+        // Handle base cases
+        if (n == 0) return 0;
+        if (n == 1) return 1;
+        
+        // Create a dp array and initialize with -1 (uncomputed)
+        vector<int> dp(n + 1, -1);
+        
+        // Call the recursive helper
+        return solve(n, dp);
+    }
+};
+🔍 Example:
+Input: n = 5
+
+Computation steps with memoization:
+
+fib(5) = fib(4) + fib(3)
+
+fib(4) = fib(3) + fib(2)
+
+
+
+Once fib(2), fib(3), etc., are computed, they're reused instead of recomputed.
+
+📈 Time and Space Complexity:
+Time: O(n)
+
+Space: O(n) for the dp array + recursive stack (could be O(n) stack space in worst case)
+
