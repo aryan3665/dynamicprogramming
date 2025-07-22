@@ -1,0 +1,102 @@
+✅ Problem Statement
+You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 step or 2 steps.
+Return the number of distinct ways to reach the top.
+
+Example:
+Input: n = 3
+
+Output: 3
+
+Explanation:
+
+1 step + 1 step + 1 step
+
+1 step + 2 steps
+
+2 steps + 1 step
+
+🧠 Key Observations
+To reach step n, you could have come from:
+
+Step n-1 (by climbing 1 step)
+
+Step n-2 (by climbing 2 steps)
+
+So, the recurrence becomes:
+
+
+ways(n) = ways(n-1) + ways(n-2)
+Just like the Fibonacci sequence!
+
+✅ Base Cases
+ways(0) = 1 (1 way to stay at ground level)
+
+ways(1) = 1 (only one way: 1 step)
+
+✅ Approach: Bottom-Up Dynamic Programming (Tabulation)
+We build the solution from the base cases up to n.
+We optimize space by only keeping the last two values (like optimized Fibonacci).
+
+💻 Code with Full Explanation
+
+class Solution {
+public:
+    int climbStairs(int n) {
+        // Base case: there's 1 way to reach step 0 or 1
+        if (n <= 1) return 1;
+
+        // Initialize ways for step 0 and step 1
+        int n1 = 1;  // ways to reach step 0
+        int n2 = 1;  // ways to reach step 1
+        int n3 = 0;  // placeholder for current step
+
+        // Loop from step 2 to step n
+        for (int i = 2; i <= n; i++) {
+            // Current step = ways to reach previous step + two steps back
+            n3 = n1 + n2;
+
+            // Move window forward
+            n1 = n2;
+            n2 = n3;
+        }
+
+        // n3 holds the answer for step n
+        return n3;
+    }
+};
+🔍 Dry Run (Example: n = 4)
+makefile
+Copy
+Edit
+n1 = 1, n2 = 1
+
+Step 2:
+n3 = 1 + 1 = 2
+
+Step 3:
+n3 = 1 + 2 = 3
+
+Step 4:
+n3 = 2 + 3 = 5
+
+Answer = 5 ways
+📈 Time & Space Complexity
+Type	Complexity
+Time	O(n)
+Space	O(1)
+
+✅ Advantages of Bottom-Up DP
+No recursion overhead
+
+No risk of stack overflow
+
+Memory efficient (O(1) space)
+
+🧪 Test Cases
+Input	Output	Explanation
+1	1	Only 1 way
+2	2	(1+1), (2)
+3	3	(1+1+1), (1+2), (2+1)
+4	5	(1+1+1+1), (1+2+1), (2+1+1), etc.
+45	1836311903	Works without overflow
+
