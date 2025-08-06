@@ -1,0 +1,123 @@
+Dynamic Programming Approaches for Grid Path Problem
+
+Problem Statement:
+Given an m x n grid, find the number of unique paths from the top-left corner (0, 0) to the bottom-right corner (m-1, n-1). You can move only right or down.
+
+====================================================================
+1. Memoization (Top-Down) Approach
+- Time Complexity: O(m x n)
+- Space Complexity: O(m x n) (DP table) + O(m + n) (Recursion stack)
+
+Approach Explanation (Hinglish):
+- Recursion + Memoization use karte hai.
+- dp[i][j] store karta hai ki (i,j) se destination tak kitne paths hai.
+- Base Case: Agar (i,j) destination hai (i==m-1 and j==n-1), return 1.
+- Edge Cases: Agar grid se bahar nikal jaaye (i>=m or j>=n), return 0.
+- Memoization: Har state ko store karo taaki dobara calculate na karna pade.
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int helper(int i, int j, int m, int n, vector<vector<int>>& dp) {
+    if (i == m - 1 && j == n - 1) return 1;
+    if (i >= m || j >= n) return 0;
+    if (dp[i][j] != -1) return dp[i][j];
+    return dp[i][j] = helper(i + 1, j, m, n, dp) + helper(i, j + 1, m, n, dp);
+}
+
+int uniquePathsMemoization(int m, int n) {
+    vector<vector<int>> dp(m, vector<int>(n, -1));
+    return helper(0, 0, m, n, dp);
+}
+
+int main() {
+    cout << "Memoization Approach: " << uniquePathsMemoization(3, 3) << endl;
+    return 0;
+}
+
+====================================================================
+2. Tabulation (Bottom-Up) Approach
+- Time Complexity: O(m x n)
+- Space Complexity: O(m x n)
+
+Approach Explanation (Hinglish):
+- 2D DP Table banate hai, where dp[i][j] = paths to reach (i,j).
+- Base Case: dp[0][0] = 1 (start point).
+- Filling DP Table:
+  - dp[i][j] = dp[i-1][j] (UPAR SE) + dp[i][j-1] (LEFT SE)
+  - Pehli row aur column mein sab 1 hoga (kyunki sirf ek direction mein ja sakte ho).
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int uniquePathsTabulation(int m, int n) {
+    vector<vector<int>> dp(m, vector<int>(n, 1));
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            dp[i][j] = dp[i-1][j] + dp[i][j-1];
+        }
+    }
+    return dp[m-1][n-1];
+}
+
+int main() {
+    cout << "Tabulation Approach: " << uniquePathsTabulation(3, 3) << endl;
+    return 0;
+}
+
+====================================================================
+3. Space Optimized (1D DP) Approach
+- Time Complexity: O(m x n)
+- Space Complexity: O(n)
+
+Approach Explanation (Hinglish):
+- Optimized Space: Hum sirf previous row aur current row ke left value track karte hai.
+- 1D Array (dp) use karo:
+  - dp[j] = dp[j] (UPAR WALA) + dp[j-1] (LEFT WALA)
+- Initialization: dp array ko 1 se initialize karo (pehli row ka case).
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int uniquePathsSpaceOptimized(int m, int n) {
+    vector<int> dp(n, 1);
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            dp[j] = dp[j] + dp[j-1];
+        }
+    }
+    return dp[n-1];
+}
+
+int main() {
+    cout << "Space Optimized Approach: " << uniquePathsSpaceOptimized(3, 3) << endl;
+    return 0;
+}
+
+====================================================================
+Comparison Summary:
+| Approach          | Time Complexity | Space Complexity  | Use Case                     |
+|-------------------|-----------------|-------------------|------------------------------|
+| Memoization       | O(m x n)        | O(m x n) + Stack  | When recursion is intuitive   |
+| Tabulation        | O(m x n)        | O(m x n)          | When iterative DP is preferred|
+| Space Optimized   | O(m x n)        | O(n)              | Best for large grids          |
+
+How to Run?
+1. Save each approach in a .cpp file.
+2. Compile using g++ filename.cpp -o output
+3. Run using ./output
+
+Example Output:
+Memoization Approach: 6
+Tabulation Approach: 6
+Space Optimized Approach: 6
+
+Final Notes:
+- Memoization: Recursive, easy to understand.
+- Tabulation: Iterative, better for tight constraints.
+- Space Optimized: Best for large grids (competitions/interviews).
+
+Happy Coding!
