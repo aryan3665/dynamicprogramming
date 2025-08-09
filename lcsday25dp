@@ -1,1 +1,148 @@
+Longest Common Subsequence (LCS) 
+1. Subsequence Kya Hota Hai?
+Definition:
 
+Subsequence original string se characters delete karke banaya ja sakta hai, lekin order change nahi hona chahiye.
+
+Continuous hone ki zaroorat nahi hai (characters skip kar sakte hain).
+
+Example:
+
+String: "abc"
+
+Valid Subsequences: "a", "b", "c", "ab", "ac", "bc", "abc", "" (empty).
+
+Invalid: "ba" (order change ho gaya), "aa" (extra 'a' nahi hai).
+
+2. LCS Problem - Brute Force Approach
+Problem Statement:
+Do strings s1 aur s2 di gayi hain.
+
+In dono mein sabse lamba common subsequence (LCS) nikalna hai.
+
+Brute Force Steps:
+Generate All Subsequences:
+
+s1 ke saare possible subsequences generate karo (2^m possibilities).
+
+s2 ke saare possible subsequences generate karo (2^n possibilities).
+
+Compare All Pairs:
+
+Har s1 ke subsequence ko s2 ke har subsequence se compare karo.
+
+Sabse lamba common subsequence dhundho.
+
+Example:
+s1 = "abc", s2 = "ac"
+
+s1 ke subsequences: "a", "b", "c", "ab", "ac", "bc", "abc".
+
+s2 ke subsequences: "a", "c", "ac".
+
+Common Subsequences: "a", "c", "ac".
+
+LCS: "ac" (length = 2).
+
+Brute Force Ki Problem:
+Time Complexity: O(2^m × 2^n) = O(2^(m+n)) → Exponential (Bahut Slow!)
+
+Example: m = 20, n = 20 → 2^40 ≈ 1 trillion comparisons! 💀
+
+Inefficient: Long strings ke liye practically solve nahi ho sakta.
+
+3. DP (Dynamic Programming) Approach - Optimal Solution
+Kyu DP Better Hai?
+Brute Force: Har possible subsequence ko compare karna inefficient hai.
+
+DP:
+
+Overlapping Subproblems ko store karke reuse karo.
+
+Time: O(m × n) (Brute Force se bahut better).
+
+Space: O(m × n) (DP table use karo).
+
+DP Steps (Recursive + Memoization):
+Recursive Function (fun(index1, index2)):
+
+index1 = current position in s1 (end se start karo).
+
+index2 = current position in s2 (end se start karo).
+
+Base Case:
+
+Agar index1 < 0 ya index2 < 0 → return 0 (no common characters left).
+
+Character Comparison:
+
+Case 1: Match (s1[index1] == s2[index2])
+
+LCS length +1 karo.
+
+Dono pointers -1 karo (fun(index1-1, index2-1)).
+
+Case 2: No Match (s1[index1] != s2[index2])
+
+Dono possibilities try karo:
+
+s1 ka current character skip karo (fun(index1-1, index2)).
+
+s2 ka current character skip karo (fun(index1, index2-1)).
+
+Max of both results lo.
+
+Memoization:
+
+Har (index1, index2) ka result dp[index1][index2] mein store karo.
+
+Next time same subproblem aaye toh directly return karo.
+
+Example Dry Run:
+s1 = "ec", s2 = "ce" → LCS = "e" ya "c" (length = 1).
+
+Initial Call: fun(1, 1) → s1[1]='c', s2[1]='e' → No match.
+
+Sub-Call 1: fun(0, 1) → s1[0]='e', s2[1]='e' → Match! → Return 1 + fun(-1, 0) = 1.
+
+Sub-Call 2: fun(1, 0) → s1[1]='c', s2[0]='c' → Match! → Return 1 + fun(0, -1) = 1.
+
+Final Result: max(1, 1) = 1.
+
+4. Time & Space Complexity
+Time Complexity:
+Brute Force: O(2^(m+n)) → Exponential (Impractical).
+
+DP (Memoization): O(m × n) → Har subproblem ek baar solve hota hai.
+
+Space Complexity:
+DP Table: O(m × n) (store results).
+
+Recursion Stack: O(max(m, n)) (depth of recursion).
+
+Optimization (Space):
+Bottom-Up DP (Tabulation) se space O(min(m, n)) tak reduce kar sakte hain.
+
+5. Final Code (C++ with DP)
+cpp
+class Solution {
+public:
+    int solve(string &text1, string &text2, int index1, int index2, vector<vector<int>> &dp) {
+        if (index1 < 0 || index2 < 0) return 0;
+        if (dp[index1][index2] != -1) return dp[index1][index2];
+
+        // If characters match
+        if (text1[index1] == text2[index2]) {
+            return dp[index1][index2] = 1 + solve(text1, text2, index1-1, index2-1, dp);
+        }
+        // If no match
+        return dp[index1][index2] = max(solve(text1, text2, index1-1, index2, dp), 
+                                      solve(text1, text2, index1, index2-1, dp));
+    }
+
+    int longestCommonSubsequence(string text1, string text2) {
+        int n = text1.size(), m = text2.size();
+        vector<vector<int>> dp(n, vector<int>(m, -1));
+        return solve(text1, text2, n-1, m-1, dp);
+    }
+};
