@@ -1,0 +1,113 @@
+# Minimum Path Sum in Grid - Complete Guide 
+
+## Problem Statement (समस्या का विवरण)
+Given a m x n grid filled with non-negative numbers , we need to find a path from top-left (0,0) to bottom-right (m-1,n-1) that minimizes the sum of numbers along the path. (हमें ऐसा रास्ता ढूंढना है जिसपर आने वाले नंबर्स का योग सबसे कम हो)
+
+### Constraints (शर्तें):
+- You can only move either **down** or **right** at any point in time (आप सिर्फ नीचे या दायें ही move कर सकते हैं)
+- Path must start at (0,0) and end at (m-1,n-1)
+
+## Approaches (तरीके)
+
+### 1. Recursive Approach (बिना memorize किए)
+**Idea :** Try all possible paths recursively (सभी possible paths को recursively try करो)
+
+```cpp
+int solve(vector<vector<int>>& grid, int i, int j) {
+    // Base Case 
+    if(i == 0 && j == 0) return grid[0][0];
+    if(i < 0 || j < 0) return INT_MAX; // Invalid path 
+    
+    int up = grid[i][j] + solve(grid, i-1, j);   // Move up (ऊपर से आना)
+    int left = grid[i][j] + solve(grid, i, j-1); // Move left (बाएं से आना)
+    
+    return min(up, left); // Return minimum
+}
+```
+**Time Complexity:** O(2^(m+n)) (बहुत slow - exponential)
+**Space Complexity:** O(m+n) (recursion stack)
+
+### 2. Memoization (Top-Down DP) Approach
+**Improvement (सुधार):** Store already computed results (जो results पहले compute किए हैं, उन्हें store कर लो)
+
+```cpp
+int dp[201][201]; // DP table
+memset(dp, -1, sizeof(dp)); // Initialize with -1
+
+int solve(vector<vector<int>>& grid, int i, int j) {
+    if(i == 0 && j == 0) return grid[0][0];
+    if(i < 0 || j < 0) return INT_MAX;
+    
+    if(dp[i][j] != -1) return dp[i][j]; // Return stored value (store किया हुआ value return करो)
+    
+    int up = grid[i][j] + solve(grid, i-1, j);
+    int left = grid[i][j] + solve(grid, i, j-1);
+    
+    return dp[i][j] = min(up, left); // Store before returning (return करने से पहले store करो)
+}
+```
+**Time Complexity:** O(m*n) (हर cell सिर्फ एक बार process होता है)
+**Space Complexity:** O(m*n) (DP table) + O(m+n) (recursion stack)
+
+### 3. Tabulation (Bottom-Up DP) Approach
+**Idea (विचार):** Build solution iteratively without recursion (बिना recursion के iterative तरीके से solve करो)
+
+```cpp
+int minPathSum(vector<vector<int>>& grid) {
+    int m = grid.size();
+    int n = grid[0].size();
+    int dp[m][n];
+    
+    for(int i=0; i<m; i++) {
+        for(int j=0; j<n; j++) {
+            if(i==0 && j==0) {
+                dp[0][0] = grid[0][0]; // Starting point (शुरुआती बिंदु)
+            }
+            else {
+                int up = INT_MAX, left = INT_MAX;
+                
+                if(i>0) up = grid[i][j] + dp[i-1][j];   // Check if up exists (ऊपर वाला exists करता है क्या)
+                if(j>0) left = grid[i][j] + dp[i][j-1]; // Check if left exists (बाएं वाला exists करता है क्या)
+                
+                dp[i][j] = min(up, left); // Take minimum path (न्यूनतम रास्ता लो)
+            }
+        }
+    }
+    return dp[m-1][n-1]; // Return bottom-right cell (अंतिम सेल का value)
+}
+```
+**Time Complexity:** O(m*n)  
+**Space Complexity:** O(m*n) (DP table)
+
+### 4. Space Optimized Approach (जगह बचाने वाला तरीका)
+**Improvement (सुधार):** Use only previous row for calculation (सिर्फ पिछली row को store करके काम चलाओ)
+
+```cpp
+int minPathSum(vector<vector<int>>& grid) {
+    int m = grid.size();
+    int n = grid[0].size();
+    vector<int> prev(n, 0);
+    
+    for(int i=0; i<m; i++) {
+        vector<int> curr(n, 0);
+        for(int j=0; j<n; j++) {
+            if(i==0 && j==0) curr[j] = grid[i][j];
+            else {
+                int up = INT_MAX, left = INT_MAX;
+                if(i>0) up = grid[i][j] + prev[j];
+                if(j>0) left = grid[i][j] + curr[j-1];
+                curr[j] = min(up, left);
+            }
+        }
+        prev = curr;
+    }
+    return prev[n-1];
+}
+```
+**Space Complexity:** O(n) (सिर्फ एक row store करते हैं)
+
+## Conclusion (निष्कर्ष)
+- Recursive approach is too slow for large grids (बड़ी grids के लिए बहुत slow)
+- Memoization (Top-Down DP) is better but uses recursion (बेहतर है लेकिन recursion use करता है)
+- Tabulation (Bottom-Up DP) is most efficient (सबसे efficient है)
+- Space optimization possible if needed (जरूरत पड़ने पर space optimize किया जा सकता है)
