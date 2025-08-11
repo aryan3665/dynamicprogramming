@@ -1,0 +1,108 @@
+Longest Palindromic Subsequence Explanation
+
+1. Understanding Palindromes
+--------------------------------
+A palindrome is a word or sequence that reads the same backward as forward.
+Examples:
+- "madam" reversed is still "madam"
+- "racecar" reversed is "racecar"
+- "abba" reversed is "abba"
+
+Even if a string isn't a perfect palindrome, parts of it might be.
+Example: In "bbbab", "bbbb" is the longest palindromic part (length 4).
+
+2. What is a Subsequence?
+---------------------------
+A subsequence is created by deleting some characters without changing the order.
+Examples for "abcde":
+- "ace" is valid (removed 'b' and 'd')
+- "aec" is invalid (order changed)
+
+3. The Problem
+---------------
+We need to find the length of the longest subsequence that's a palindrome.
+Example:
+Input: "bbbab"
+Output: 4 (from "bbbb")
+
+4. Key Insight
+---------------
+A palindrome reads the same forward and backward.
+So the LPS is actually the Longest Common Subsequence (LCS) between:
+- The original string
+- Its reverse
+
+Example:
+Original: "bbbab"
+Reversed: "babbb"
+LCS: "bbbb" (length 4)
+
+5. Dynamic Programming Solution
+--------------------------------
+We use a DP table to store intermediate results.
+
+DP Table Structure:
+- dp[i][j] = LCS length between:
+  - First string up to index i
+  - Second string up to index j
+
+Base Case:
+- If either string is empty (i/j < 0), LCS = 0
+
+Recursive Cases:
+1. If characters match:
+   dp[i][j] = 1 + dp[i-1][j-1]
+2. If they don't match:
+   dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+6. The Code
+-----------
+class Solution {
+public:
+    int dp[1001][1001]; // Storage for DP results
+    
+    int solve(string &s1, string &s2, int i, int j) {
+        if(i < 0 || j < 0) return 0; // Base case
+        
+        if(dp[i][j] != -1) return dp[i][j]; // Already computed
+        
+        if(s1[i] == s2[j]) { // Characters match
+            return dp[i][j] = 1 + solve(s1, s2, i-1, j-1);
+        }
+        else { // Characters don't match
+            return dp[i][j] = max(solve(s1, s2, i-1, j), 
+                                 solve(s1, s2, i, j-1));
+        }
+    }
+    
+    int longestPalindromeSubseq(string s) {
+        string s1 = s;
+        reverse(s.begin(), s.end());
+        string s2 = s;
+        
+        memset(dp, -1, sizeof(dp)); // Initialize
+        
+        return solve(s1, s2, s1.size()-1, s2.size()-1);
+    }
+};
+
+7. Complexity Analysis
+-----------------------
+Time: O(n²) - We fill an n x n table
+Space: O(n²) - For storing the DP table
+
+8. Step-by-Step Example
+------------------------
+For s = "bbbab":
+1. Original: "bbbab"
+2. Reversed: "babbb"
+3. LCS process:
+   - Compare last 'b' with last 'b' → match (1)
+   - Compare 'a' with 'b' → no match (take max)
+   - Continue until we find "bbbb" (length 4)
+
+9. Summary
+-----------
+1. LPS = LCS between string and its reverse
+2. DP helps avoid redundant calculations
+3. Efficient O(n²) solution
