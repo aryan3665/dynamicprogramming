@@ -1,0 +1,104 @@
+Minimum Operations to Make Strings Equal
+=======================================
+
+Explanation for Class 10 Students:
+
+1. Problem Understanding:
+- We have two strings (let's call them string1 and string2)
+- We need to make them equal using minimum operations
+- Allowed operations:
+  * Delete any character from any string
+  * Insert any character into any string
+
+2. Simple Idea:
+- Keep the common parts that are already matching
+- Only modify the parts that don't match
+- Minimum operations = (length of string1 - common parts) + (length of string2 - common parts)
+
+How the Solution Works:
+-----------------------
+1. First we find the longest sequence of characters that appears in both strings in the same order (called LCS - Longest Common Subsequence)
+
+2. Then we calculate:
+   - Characters to delete from string1 = length of string1 - LCS length
+   - Characters to add to string1 = length of string2 - LCS length
+   - Total operations = sum of above two
+
+Example Walkthrough:
+-------------------
+Let's take:
+string1 = "sea" (length 3)
+string2 = "eat" (length 3)
+
+Step 1: Find common parts
+- Common letters in order: 'e' and 'a' (LCS = "ea", length 2)
+
+Step 2: Calculate operations
+- From "sea":
+  * Need to delete 's' (1 operation)
+- To make it "eat":
+  * Need to add 't' (1 operation)
+- Total operations = 1 + 1 = 2
+
+Time and Space Complexity:
+-------------------------
+Time: O(n×m) where:
+- n = length of string1
+- m = length of string2
+(Because we check each character combination)
+
+Space: O(n×m)
+(Because we make a table of size n×m)
+
+C++ Code Explanation:
+--------------------
+1. solve() function:
+- Makes a table (2D array) to store common sequence lengths
+- Fills the table by comparing characters:
+  * If same: take diagonal value + 1
+  * If different: take maximum of left or top value
+
+2. minOperations() function:
+- Uses solve() to get common length
+- Applies the formula:
+  (string1.length - common) + (string2.length - common)
+
+Complete C++ Code:
+-----------------
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class Solution {
+public:
+    int solve(string &s1, string &s2) {
+        int n = s1.size();
+        int m = s2.size();
+        vector<vector<int>> dp(n+1, vector<int>(m+1, 0));
+        
+        for(int i = 1; i <= n; i++) {
+            for(int j = 1; j <= m; j++) {
+                if(s1[i-1] == s2[j-1]) {
+                    dp[i][j] = 1 + dp[i-1][j-1];
+                } else {
+                    dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        return dp[n][m];
+    }
+    
+    int minOperations(string &s1, string &s2) {
+        int common = solve(s1, s2);
+        return (s1.size() - common) + (s2.size() - common);
+    }
+};
+
+int main() {
+    Solution sol;
+    string s1 = "sea";
+    string s2 = "eat";
+    cout << "Minimum operations: " << sol.minOperations(s1, s2);
+    return 0;
+}
