@@ -1,0 +1,90 @@
+
+Unique Paths Problem Explanation
+================================
+
+**Problem Samajho:**
+Humko ek grid diya hai m rows aur n columns ka. Hum start karte hain top-left corner (0,0) se aur hume pahunchna hai bottom-right corner (m-1,n-1) par. Hum sirf right aur down move kar sakte hain. Kitne unique paths hain?
+
+**Example:**
+Input: m = 3, n = 2
+Output: 3
+Explanation:
+1. Right -> Down -> Down
+2. Down -> Right -> Down
+3. Down -> Down -> Right
+
+**Intuition (Sochne ka Tarika):**
+1. Har point par humare paas do options hain:
+   - Right jao (column increase karo)
+   - Down jao (row increase karo)
+2. Total paths = right jane ke paths + down jane ke paths
+3. Base case: agar hum destination par pahunch gaye, to 1 path mila
+
+**Approach (Kaise Solve Kare):**
+1. **Recursive Solution:**
+   - Har cell se hum right aur down dono taraf try karenge
+   - Paths ka sum return karenge
+   - Par ye bahut slow hoga (exponential time)
+
+2. **DP Solution (Memoization):**
+   - Hum results store karenge taaki baar-baar calculate na karna pade
+   - dp[i][j] = number of ways to reach (i,j) from (0,0)
+
+**Solution Code (Samjha ke):**
+```cpp
+class Solution {
+public:
+    int dp[100][100]; // Storage for memoization
+
+    int solve(int i, int j) {
+        // Agar start point par pahunch gaye
+        if (i == 0 && j == 0) return 1;
+        
+        // Agar grid se bahar chale gaye
+        if (i < 0 || j < 0) return 0;
+        
+        // Agar pehle calculate kar chuke hain
+        if (dp[i][j] != -1) return dp[i][j];
+
+        // Right jane ke paths + Down jane ke paths
+        return dp[i][j] = solve(i - 1, j) + solve(i, j - 1);
+    }
+
+    int uniquePaths(int m, int n) {
+        memset(dp, -1, sizeof(dp)); // Sabko -1 se initialize karo
+        return solve(m - 1, n - 1); // Destination se start karo  
+    }
+};
+```
+
+**Time Complexity:**
+- O(m*n) - Kyunki har cell ek baar process hota hai
+- Bina DP ke exponential hota (O(2^(m+n)))
+
+**Space Complexity:**
+- O(m*n) - DP table ke liye
+- Recursion stack space bhi O(m+n) worst case mein
+
+**Visualization (Example ke sath):**
+m=3, n=2
+
+Start: (0,0)
+End: (2,1)
+
+Paths:
+1. (0,0) -> (0,1) -> (1,1) -> (2,1)
+2. (0,0) -> (1,0) -> (1,1) -> (2,1)
+3. (0,0) -> (1,0) -> (2,0) -> (2,1)
+
+**Optimization (Aur Behtar Solution):**
+Hum isko combination formula se bhi solve kar sakte hain:
+Total moves = (m-1) down + (n-1) right
+Total paths = (m+n-2)! / ((m-1)! * (n-1)!)
+
+Par DP solution zyada intuitive hai aur similar problems ke liye adapt karne mein aasan hai.
+``` 
+
+Key Points:
+- DP table banake hum repeated calculations bachate hain
+- Right aur down moves ka combination hai solution
+- Bottom-up approach (destination se start tak) use kiya gaya hai
