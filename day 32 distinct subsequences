@@ -1,0 +1,156 @@
+Distinct Subsequences Problem Explanation
+=========================================
+
+1. Problem Definition (Samasyā Kī Paribhāṣā)
+--------------------------------------------
+Diyā gayā:
+- Ek source string 's' (e.g., "rabbbit")
+- Ek target string 't' (e.g., "rabbit")
+
+Hamārā lakṣya: Gyāt karnā ki 't', 's' mein kitnī baar ek subsequence ke rūp mein ātā hai
+
+Subsequence kā matlab:
+- Original string se kuch characters ko delete karke banī string
+- Par character kā order vahī rahanā chāhiye
+- Example: "abcde" mein "ace" ek subsequence hai
+
+2. Recursive Approach (Punarāvṛtti Dṛṣṭikoṇ)
+--------------------------------------------
+Base Cases:
+1. Agar t khaṭam ho gayā (j == t.size()) -> 1 return karo (ek valid subsequence milā)
+2. Agar s khaṭam ho gayā par t nahī (i == s.size()) -> 0 return karo
+
+Recursive Cases:
+- Agar s[i] == t[j]:
+  - Dono options consider karo:
+    * Include: dono pointers aage badhāo (i+1, j+1)
+    * Exclude: sirf s pointer badhāo (i+1, j)
+- Agar s[i] != t[j]:
+  - Sirf s pointer badhāo (i+1, j)
+
+3. Dynamic Programming (Gatishīl Pāth Yojanā)
+---------------------------------------------
+Recursive solution mein duplicate calculations ko bachāne ke liye DP table use karte hain
+
+DP Table Definition:
+dp[i][j] = t[0..j-1] ko s[0..i-1] se banāne ke tarīkoñ kī sankhyā
+
+Initialization:
+- dp[i][0] = 1 (khālī t ko banāne kā ek hī tarikā - sab characters delete karo)
+- dp[0][j] = 0 (j > 0) (khālī s se non-empty t nahī banā sakte)
+
+Transition:
+- Agar s[i-1] == t[j-1]:
+  dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
+- Else:
+  dp[i][j] = dp[i-1][j]
+
+4. Optimized Space Approach (Sthān Anukūlit Dṛṣṭikoṇ)
+-----------------------------------------------------
+1D DP array use karke space ko optimize kar sakte hain:
+- dp[j] = t[0..j-1] ko banāne ke tarīke
+- Right se left process karnā zarūrī hai
+
+5. Important Observations (Mahatvapūrṇ Dṛṣṭikoṇ)
+------------------------------------------------
+- Integer overflow se bachne ke liye unsigned long long use karnā
+- Empty string ke liye special case handle karnā
+- DP table ko properly initialize karnā
+
+6. Example Dry Run (Udāharaṇa)
+------------------------------
+s = "rabbbit", t = "rabbit"
+
+DP Table:
+   | r a b b i t
+-----------------
+  |1 0 0 0 0 0 0
+r |1 1 0 0 0 0 0
+a |1 1 1 0 0 0 0
+b |1 1 1 1 0 0 0
+b |1 1 1 2 1 0 0
+b |1 1 1 3 3 0 0
+i |1 1 1 3 3 3 0
+t |1 1 1 3 3 3 3
+
+Final Answer: dp[7][6] = 3
+
+7. Time Complexity (Samay Jāṭilatā)
+-----------------------------------
+- Recursive: O(2^(m+n)) (without memoization)
+- DP: O(m*n) (both time and space)
+- Optimized DP: O(m*n) time, O(m) space
+
+8. Space Complexity (Sthān Jāṭilatā)
+------------------------------------
+- Recursive with memoization: O(m*n)
+- Iterative DP: O(m*n)
+- Space optimized DP: O(m)
+
+9. Edge Cases (Viśeṣ Prasaṅg)
+-----------------------------
+- Jab t khālī ho (return 1)
+- Jab s khālī ho aur t nahī (return 0)
+- Jab dono strings same ho (return 1)
+- Jab t s se lambī ho (return 0)
+
+10. Sample Code (Namūnā Koḍ)
+----------------------------
+// Recursive + Memoization
+int solve(string &s, string &t, int i, int j, vector<vector<int>>& dp) {
+    if(j == t.size()) return 1;
+    if(i == s.size()) return 0;
+    if(dp[i][j] != -1) return dp[i][j];
+    
+    if(s[i] == t[j])
+        return dp[i][j] = solve(s,t,i+1,j+1,dp) + solve(s,t,i+1,j,dp);
+    else
+        return dp[i][j] = solve(s,t,i+1,j,dp);
+}
+
+// Iterative DP
+int numDistinct(string s, string t) {
+    int m = s.size(), n = t.size();
+    vector<vector<unsigned long long>> dp(m+1, vector<unsigned long long>(n+1, 0));
+    
+    for(int i=0; i<=m; i++) dp[i][0] = 1;
+    
+    for(int i=1; i<=m; i++) {
+        for(int j=1; j<=n; j++) {
+            if(s[i-1] == t[j-1])
+                dp[i][j] = dp[i-1][j-1] + dp[i-1][j];
+            else
+                dp[i][j] = dp[i-1][j];
+        }
+    }
+    return dp[m][n];
+}
+
+11. Practice Problems (Abhyās Samasyāeṁ)
+----------------------------------------
+1. Count how many times "abc" appears in "abbc"
+2. Find number of ways to get "cat" from "catcat"
+3. Solve for s="babgbag" and t="bag"
+
+12. Common Mistakes (Sāmānya Galatiyāṁ)
+--------------------------------------
+- Base cases bhūlnā
+- Integer overflow ko handle na karnā
+- DP table ko galat initialize karnā
+- Space optimization mein right-to-left traversal na karnā
+
+13. Applications (Upayogitā)
+---------------------------
+- DNA sequence matching
+- Version control systems
+- Spell checking algorithms
+- Bioinformatics
+
+14. Conclusion (Niṣkarsh)
+------------------------
+Ye problem DP ke fundamental concepts ko samajhne ke liye bahut acchā udāharaṇ hai. Isme:
+- Subsequence definition
+- Recursive thinking
+- DP table formation
+- Space optimization
+sabkuch cover hotā hai.
