@@ -1,0 +1,126 @@
+
+Edit Distance Problem - Full Explanation
+=========================================
+
+1. Problem Definition
+---------------------
+The Edit Distance (Levenshtein Distance) problem asks:
+Given two strings word1 and word2, what is the minimum number of operations required to convert word1 into word2?
+
+Allowed operations:
+1. Insert a character
+2. Delete a character
+3. Replace a character
+
+Example:
+word1 = "horse", word2 = "ros"
+Minimum operations = 3:
+horse -> rorse (replace 'h' with 'r')
+rorse -> rose  (delete 'r')
+rose  -> ros   (delete 'e')
+
+---
+
+2. Key Observations
+-------------------
+- If characters match, we don't need an operation; we just move to the previous characters.
+- If characters don't match, we have three choices:
+    a) Insert: Match word1[0..i] with word2[0..j-1], then insert word2[j]
+    b) Delete: Match word1[0..i-1] with word2[0..j], then delete word1[i]
+    c) Replace: Match word1[0..i-1] with word2[0..j-1], then replace word1[i] with word2[j]
+- We want the minimum operations among these choices.
+
+---
+
+3. Recursive Formulation
+-------------------------
+Let solve(i, j) be the minimum operations needed to convert the first i+1 chars of word1 into the first j+1 chars of word2.
+
+Base cases:
+- If i < 0: Need j+1 insertions
+- If j < 0: Need i+1 deletions
+
+Recursive case:
+If word1[i] == word2[j]:
+    solve(i, j) = solve(i-1, j-1)
+Else:
+    solve(i, j) = 1 + min(
+        solve(i, j-1),   // Insert
+        solve(i-1, j),   // Delete
+        solve(i-1, j-1)  // Replace
+    )
+
+---
+
+4. Top-Down DP (Memoization)
+-----------------------------
+We can implement the recursion and store results in a dp[i][j] table to avoid recomputation.
+This approach has time complexity O(n*m) and space complexity O(n*m).
+
+---
+
+5. Bottom-Up DP (Tabulation)
+----------------------------
+We define dp[i][j] = minimum operations to convert the first i characters of word1 into the first j characters of word2.
+
+Base cases:
+dp[0][j] = j  // inserting j chars
+dp[i][0] = i  // deleting i chars
+
+Transition:
+If word1[i-1] == word2[j-1]:
+    dp[i][j] = dp[i-1][j-1]
+Else:
+    dp[i][j] = 1 + min(dp[i][j-1], dp[i-1][j], dp[i-1][j-1])
+
+Time complexity: O(n*m)
+Space complexity: O(n*m) → can be optimized to O(min(n, m)) using two 1D arrays.
+
+---
+
+6. Example
+----------
+word1 = "horse", word2 = "ros"
+
+DP Table (i rows for word1, j columns for word2):
+    ""  r  o  s
+""  0  1  2  3
+h   1  1  2  3
+o   2  2  1  2
+r   3  2  2  2
+s   4  3  3  2
+e   5  4  4  3
+
+Answer = 3.
+
+---
+
+7. Complexity Analysis
+-----------------------
+Let n = length of word1, m = length of word2
+
+Brute Force Recursion:
+- Time: O(3^(n+m))  (because at each mismatch, up to 3 choices)
+- Space: O(n+m) (stack depth)
+
+Top-Down DP (Memoization):
+- Time: O(n*m) (each state computed once)
+- Space: O(n*m) for memo table + O(n+m) recursion stack
+
+Bottom-Up DP (Tabulation):
+- Time: O(n*m)
+- Space: O(n*m)
+
+Space-Optimized DP:
+- Time: O(n*m)
+- Space: O(min(n, m)) by only storing two rows at a time
+
+---
+
+8. Applications
+---------------
+- Spelling correction (suggest nearest word)
+- DNA sequence alignment
+- Diff tools (comparing two documents)
+- Natural Language Processing (measuring string similarity)
+
