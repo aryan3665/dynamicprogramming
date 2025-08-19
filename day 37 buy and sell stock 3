@@ -1,0 +1,299 @@
+
+TITLE: Best Time to Buy and Sell Stock III (LeetCode 123)
+AUTHOR: Your Name
+DESCRIPTION: Detailed guide from recursion → memoization → bottom-up tabulation, with time and space complexities, plus common pitfalls and edge cases.
+=======================================================================================================================================================
+
+
+1. Problem Statement
+
+2. Examples
+
+3. State Modeling
+
+4. Approach A: Pure Recursion
+
+5. Approach B: Recursion + Memoization (Top-Down DP)
+
+6. Approach C: Bottom-Up Tabulation
+
+7. Optional Optimizations (brief)
+
+8. Edge Cases & Pitfalls
+
+9. Correctness Intuition
+
+10. Complexity Summary
+
+11. PROBLEM STATEMENT
+
+
+You are given an integer array prices where prices\[i] is the price of a stock on day i.
+Return the maximum profit you can achieve with at most 2 transactions.
+
+Rules:
+
+* You may hold at most one share at a time.
+* A transaction = one buy + one sell.
+* You must sell before buying again.
+* At most 2 transactions in total.
+
+Goal: Maximize total profit.
+
+2. EXAMPLES
+
+---
+
+Example 1
+Input:  \[3,3,5,0,0,3,1,4]
+Output: 6
+Explanation:
+Buy at 0 (day 3 or 4), sell at 3 (day 5) → profit 3
+Buy at 1 (day 6), sell at 4 (day 7) → profit 3
+Total = 6
+
+Example 2
+Input:  \[1,2,3,4,5]
+Output: 4
+Explanation:
+Single increasing run: buy at 1, sell at 5 → profit 4
+
+Example 3
+Input:  \[7,6,4,3,1]
+Output: 0
+Explanation:
+Prices never rise → do nothing
+
+3. STATE MODELING
+
+---
+
+We use the standard DP modeling for stock problems:
+
+State:
+index  ∈ \[0..n]                 (current day)
+buy    ∈ {0,1}                  (1 = we are allowed to buy; 0 = we must sell if we act)
+cap    ∈ {0,1,2}                (transactions left; each sell consumes 1)
+
+Meaning:
+f(index, buy, cap) = maximum profit achievable starting from day = index,
+given whether we can buy now (buy=1) or must sell (buy=0),
+with at most "cap" transactions remaining.
+
+Transitions:
+If buy == 1:
+\- Take (buy now):   -prices\[index] + f(index+1, 0, cap)
+\- Skip:              f(index+1, 1, cap)
+Choose max of the two.
+
+If buy == 0:
+\- Take (sell now):   prices\[index] + f(index+1, 1, cap-1)
+\- Skip:               f(index+1, 0, cap)
+Choose max of the two.
+
+Base Cases:
+If cap == 0 → return 0  (no transactions left)
+If index == n → return 0 (no days left)
+
+Answer:
+f(0, 1, 2)
+
+4. APPROACH A: PURE RECURSION
+
+---
+
+Definition:
+int solve(index, buy, cap):
+if cap == 0 or index == n: return 0
+if buy == 1:
+return max(
+-prices\[index] + solve(index+1, 0, cap),
+solve(index+1, 1, cap)
+)
+else:
+return max(
+prices\[index] + solve(index+1, 1, cap-1),
+solve(index+1, 0, cap)
+)
+
+Complexity (worst case):
+Time:    Exponential (≈ O(2^n)) — too slow for large n
+Space:   O(n) recursion depth
+
+5. APPROACH B: RECURSION + MEMOIZATION (TOP-DOWN DP)
+
+---
+
+Idea:
+Cache results of (index, buy, cap) to avoid recomputation.
+
+DP Table:
+dp\[n]\[2]\[3] initialized to -1
+
+C++ (Memoized) — matches your current approach:
+
+class Solution {
+public:
+int solve(int i, int buy, int cap,
+vector\<vector\<vector<int>>>& dp,
+vector<int>& prices) {
+
+```
+      if (cap == 0) return 0;
+      if (i == (int)prices.size()) return 0;
+
+      if (dp[i][buy][cap] != -1) return dp[i][buy][cap];
+
+      if (buy) {
+          int take  = -prices[i] + solve(i+1, 0, cap, dp, prices);
+          int skip  =  solve(i+1, 1, cap, dp, prices);
+          return dp[i][buy][cap] = max(take, skip);
+      } else {
+          int take  =  prices[i] + solve(i+1, 1, cap-1, dp, prices);
+          int skip  =  solve(i+1, 0, cap, dp, prices);
+          return dp[i][buy][cap] = max(take, skip);
+      }
+  }
+
+  int maxProfit(vector<int>& prices) {
+      int n = prices.size();
+      vector<vector<vector<int>>> dp(n+1, vector<vector<int>>(2, vector<int>(3, -1)));
+      return solve(0, 1, 2, dp, prices);
+  }
+```
+
+};
+
+Correctness:
+Each unique (i,buy,cap) computed once.
+
+Complexity:
+Time:  O(n \* 2 \* 3) = O(n)
+Space: O(n \* 2 \* 3) for dp + O(n) recursion stack
+
+6. APPROACH C: BOTTOM-UP TABULATION
+
+---
+
+Idea:
+Build dp from smaller indices to larger; remove recursion.
+
+DP Table:
+dp\[n+1]\[2]\[3], initialized to 0.
+
+Initialization:
+For all buy ∈ {0,1}, t ∈ {0,1,2}: dp\[n]\[buy]\[t] = 0 (no days left)
+For all i, buy: dp\[i]\[buy]\[0] = 0 (no transactions left)
+
+Order:
+for i = n-1 down to 0:
+for buy in {0,1}:
+for t in {1,2}:
+if buy == 1:
+dp\[i]\[1]\[t] = max(-prices\[i] + dp\[i+1]\[0]\[t],
+dp\[i+1]\[1]\[t]);
+else:
+dp\[i]\[0]\[t] = max( prices\[i] + dp\[i+1]\[1]\[t-1],
+dp\[i+1]\[0]\[t]);
+
+Answer:
+dp\[0]\[1]\[2]
+
+C++ (Bottom-Up Tabulation):
+
+class Solution {
+public:
+int maxProfit(vector<int>& prices) {
+int n = prices.size();
+vector\<vector\<vector<int>>> dp(n+1, vector\<vector<int>>(2, vector<int>(3, 0)));
+
+```
+      // dp[n][*][*] already 0; dp[*][*][0] already 0
+
+      for (int i = n - 1; i >= 0; --i) {
+          for (int t = 1; t <= 2; ++t) {
+              // buy = 1
+              dp[i][1][t] = max(-prices[i] + dp[i+1][0][t],
+                                 dp[i+1][1][t]);
+              // buy = 0
+              dp[i][0][t] = max( prices[i] + dp[i+1][1][t-1],
+                                 dp[i+1][0][t]);
+          }
+      }
+      return dp[0][1][2];
+  }
+```
+
+};
+
+Complexity:
+Time:  O(n \* 2 \* 3) = O(n)
+Space: O(n \* 2 \* 3) = O(n)
+
+7. OPTIONAL OPTIMIZATIONS (BRIEF)
+
+---
+
+Space-Optimized Tabulation:
+Only dp\[i+1] is needed to compute dp\[i]. Use two 2×3 arrays:
+next\[2]\[3], curr\[2]\[3]
+Complexity:
+Time:  O(n)
+Space: O(1) (constant, \~6 integers)
+
+Classic 4-Variable Trick (for at most 2 transactions):
+Maintain:
+buy1, sell1, buy2, sell2
+Update per price p:
+buy1  = max(buy1, -p)
+sell1 = max(sell1, buy1 + p)
+buy2  = max(buy2, sell1 - p)
+sell2 = max(sell2, buy2 + p)
+Answer = sell2
+Complexity:
+Time:  O(n)
+Space: O(1)
+
+8. EDGE CASES & PITFALLS
+
+---
+
+* Empty or single-element array → profit = 0
+* cap must be part of the state; omitting it breaks memoization
+* Ensure selling consumes a transaction (cap reduces on sell, not buy)
+* Use long long if prices/profits can exceed 32-bit bounds (platform dependent)
+* Multiple equal prices should be handled naturally by max transitions
+
+9. CORRECTNESS INTUITION
+
+---
+
+* At any day you either act (buy/sell) or skip.
+* The DP encapsulates future optimal profit via subproblems.
+* Reducing cap only on sell correctly counts “complete” transactions.
+* Bottom-up mirrors the same decisions as top-down but iteratively.
+
+10. COMPLEXITY SUMMARY
+
+---
+
+Pure Recursion:
+Time:  Exponential (\~2^n)
+Space: O(n) (recursion depth)
+
+Memoization (Top-Down):
+Time:  O(n)
+Space: O(n) for dp + O(n) stack
+
+Bottom-Up Tabulation:
+Time:  O(n)
+Space: O(n)
+
+Space-Optimized Tabulation:
+Time:  O(n)
+Space: O(1)
+
+4-Variable Method (at most 2 transactions):
+Time:  O(n)
+Space: O(1)
+
